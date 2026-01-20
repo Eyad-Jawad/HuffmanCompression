@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <ctime>
 #include <fstream>
@@ -7,9 +8,7 @@
 #include <queue>
 #include <string>
 
-
 using namespace std;
-
 
 class TreeNode {
     public:
@@ -20,21 +19,7 @@ class TreeNode {
             weight = w;
             left = l;
             right = r;
-        }
 
-        void trv(TreeNode *head) {
-            if (head == nullptr) {
-                cout << "Null\n";
-                return;
-            }
-            string c = ""; 
-            if (head->val != -1) c = (char) head->val;
-            cout << head->val << ' ' << c << " : " << head->weight << endl;
-            cout << "left: ";
-            trv(head->left);
-            cout << "right: ";
-            trv(head->right);
-            return;
         }
         void delTreeNode(TreeNode *head) {
             if (head == nullptr) return;
@@ -42,71 +27,80 @@ class TreeNode {
             delTreeNode(head->right);
             delete head;
         }
-
-    private:
 };
 
 class BitWriter {
     private:
-        string bits;
+        uint64_t bits;
         int lengthOfBits;
         uint8_t buffer;
         int bufferSizeInBytes;
         int bufferSizeInBits;
     public:
         BitWriter () {
-            bits = "";
+            bits = 0;
             lengthOfBits = 0;
             buffer = 0;
             bufferSizeInBytes = sizeof(buffer);
             bufferSizeInBits = bufferSizeInBytes * 8;
         }
 
-        void bitStorer (ofstream &f, string s) {
-            bits += s;
-            lengthOfBits += s.size();
+        void bitStorer (ofstream &f, uint16_t i) {
+            int lenInBits = -1;
+            uint16_t temp = i;
+            while (temp > 0) {
+                lenInBits++;
+                temp >>= 1;
+            }
+
+            lengthOfBits += lenInBits;
+            i ^= (1 << lenInBits);
+            bits = ((bits << lenInBits) | i);
+
             while (lengthOfBits >= bufferSizeInBits) {
                 bitWriter(f);
             }
         }
 
         void bitWriter (ofstream &f) {
-            for (int i = 0; i < bufferSizeInBits; i++) {
-                buffer <<= 1;
-                if (bits[i] == '1') buffer++;
-            }
+            int shift = lengthOfBits - bufferSizeInBits;
+            buffer = (bits >> (shift));
             f.write((reinterpret_cast<char*> (&buffer)), bufferSizeInBytes);
 
-            bits.erase(bits.begin(), bits.begin() + bufferSizeInBits);
-            buffer = 0;
+            bits ^= ((bits >> shift) << shift);
             lengthOfBits -= bufferSizeInBits;
+            buffer = 0;
         }
 
         void flushBitWriter (ofstream &f) {
             if (lengthOfBits > 0) {
-                for (int i = 0; i < lengthOfBits; i++) {
-                    buffer <<= 1;
-                    if (bits[i] == '1') buffer++;
-                }
-                buffer <<= (bufferSizeInBits - lengthOfBits);
+                buffer = (bits << (bufferSizeInBits - lengthOfBits));
                 f.write((reinterpret_cast<char*> (&buffer)), bufferSizeInBytes);
-
-                bits = "";
-                lengthOfBits = 0;
-                buffer = 0;
+                bits = lengthOfBits = buffer = 0;
             }
         }
-        bool bitReader (ofstream &f, uint8_t chunk, map <string, int> &table) {
+};
+
+class BitReader {
+    private: 
+        uint16_t buffer;
+    public:
+        BitReader () {
+            buffer = 1;
+        }
+
+        bool readBits(ofstream &f, uint8_t chunk, map <int, int> &table) {
+            int bufferSizeInBits = sizeof(chunk) * 8;
             for (int i = 0; i < bufferSizeInBits; i++) {
-                uint8_t tChunk = (chunk << i);
-                tChunk = (tChunk >> (bufferSizeInBits - 1));
-                char c = '0' + tChunk;
-                bits += c;
-                if ((table.find(bits) != table.end())) {
-                    if (table[bits] == -1) return false;
-                    char ch = table[bits];
-                    f.write(&ch, 1);
-                    bits = "";
+                buffer <<= 1;
+                buffer += ((chunk >> (bufferSizeInBits - 1 - i)) & 1);
+
+                if (table.find(buffer) != table.end()) {
+                    if (table[buffer] == -1) return false; // our EOF, it returns false to signal the reader to stop
+        
+                    char c = table[buffer];
+                    f.write(&c, 1);
+                    buffer = 1;
                 }
             }
             return true;
@@ -114,11 +108,10 @@ class BitWriter {
 };
 
 
-
 vector <TreeNode*> getCount(ifstream &f);
 vector <TreeNode*> bubbleSort(vector <TreeNode*> vals);
 TreeNode* makeHuffTree(vector <TreeNode*> vals);
-void makeTable (TreeNode *head, string s, map<int, string> &table);
+void makeTable (TreeNode *head, int s, map <int, int> &table);
 
 
 int main(int argc, char *argv[]) {
@@ -134,16 +127,24 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
+    cout << "Reading the file...\n";
     vector <TreeNode*> vals = getCount(f);
     f.close();
+    clock_t readingFile = clock() - programTime;
+    cout << "Done reading the file!: " << readingFile/1000.0 << "\n\n";
+
+    cout << "Making the encoding tree...\n";
     TreeNode *head = makeHuffTree(vals);
 
-    map <int, string> table = {};
-    makeTable(head, "", table);
+    cout << "Making the encoding table...\n";
+    map <int, int> table = {};
+    makeTable(head, 1, table); // 1 = 00000001 in binary
     head->delTreeNode(head);
 
+    clock_t treeAndTableTime = clock() - programTime - readingFile;
+    cout << "Done making the huffman tree and table!: " << treeAndTableTime/1000.0 << "\n\n";
+
     ofstream o ("output.bin", ios::binary);
-    
 
     ifstream d(argv[1], ios::binary);
     // ifstream d("test.txt", ios::binary);
@@ -152,9 +153,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    
+    cout << "Writing the encoded file...\n";
     int sizeBeforeComp = 0;
-    int buf;
+    unsigned int buf;
     BitWriter bits;
     while (true) {
         buf = d.get();
@@ -167,11 +168,12 @@ int main(int argc, char *argv[]) {
         bits.bitStorer(o, table[buf]);
     }
     o.close(); d.close();
+    clock_t encodignTime = clock() - programTime - readingFile - treeAndTableTime;
+    cout << "Done writing the encoded file!: " << encodignTime/1000.0 << "\n\n";
     
-    map <string, int> invTable;
+    map <int, int> invTable;
     for (auto v : table) {
         invTable[v.second] = v.first;
-        cout << v.second << " : " << v.first << endl;
     }
 
     ofstream ot ("output.txt", ios::binary);
@@ -181,17 +183,21 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
+    cout << "Writing the decoded file...\n";
+    BitReader bitsR;
     int sizeAfterComp = 0;
     uint8_t readingBuf;
-    while (true) {
+    while (c.read(reinterpret_cast<char*>(&readingBuf), 1)) {
         sizeAfterComp++;
-        readingBuf = c.get();
-        bool state = bits.bitReader(ot, readingBuf, invTable);
+        bool state = bitsR.readBits(ot, readingBuf, invTable);
         if (!state) break;
     }
+    clock_t decodingTime = clock() - programTime - readingFile - treeAndTableTime - encodignTime;
+    cout << "Done writing the decoded file!: " << decodingTime/1000.0 << "\n\n";
 
-    cout << "It took the program " << (clock() - programTime)/1000 << "s to zip and unzip the file " << argv[1];
-    cout << " which is of size: " << (sizeBeforeComp/1024.0)/1024.0 << "MB before compression, and of size: " << (sizeAfterComp/1024.0)/1024.0 << "MB after cpmpression";
+    cout << string(40, '*') << '\n' << string(18, ' ') << "DONE!\n" << string(40, '*') << "\n\n";
+    cout << "It took the program " << (clock() - programTime)/1000.0 << "s to zip and unzip the file " << argv[1];
+    cout << " which is of size: " << (sizeBeforeComp/1024.0) << "KB before compression, and of size: " << (sizeAfterComp/1024.0) << "KB after cpmpression";
     cout << "saving " << ((sizeBeforeComp - sizeAfterComp)/ (float) sizeBeforeComp) * 100 << "%\n";
     return 0;
 }
@@ -200,8 +206,7 @@ vector <TreeNode*> getCount(ifstream &f)
 {
     map <int, int> counter = {};
     int buffer;
-    while (true) {
-        buffer = f.get();
+    while (buffer = f.get()) {
         if (buffer == EOF) break;
         counter[buffer]++;
     }
@@ -254,13 +259,13 @@ TreeNode* makeHuffTree(vector <TreeNode*> vals)
     return vals[0];
 }
 
-void makeTable (TreeNode *head, string s, map<int, string> &table)
+void makeTable (TreeNode *head, int i, map <int, int> &table)
 {
     if (!head) return;
     if (!head->left && !head->right) {
-            table[head->val] = s;
+            table[head->val] = i;
             return;
         }
-    makeTable(head->left,  s + '0', table);
-    makeTable(head->right, s + '1', table);
+    makeTable(head->left,  (i << 1),     table);
+    makeTable(head->right, (i << 1) + 1, table);
 }
