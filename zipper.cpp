@@ -29,6 +29,12 @@ class TreeNode {
         }
 };
 
+struct PQComp {
+    bool operator() (const TreeNode *a, const TreeNode *b) const {
+        return a->weight > b->weight;
+    }
+};
+
 class BitWriter {
     private:
         uint64_t bits;
@@ -108,9 +114,8 @@ class BitReader {
 };
 
 
-vector <TreeNode*> getCount(ifstream &f);
-vector <TreeNode*> bubbleSort(vector <TreeNode*> vals);
-TreeNode* makeHuffTree(vector <TreeNode*> vals);
+priority_queue <TreeNode*, vector <TreeNode*>, PQComp> getCount(ifstream &f);
+TreeNode* makeHuffTree(priority_queue <TreeNode*, vector <TreeNode*>, PQComp> pq);
 void makeTable (TreeNode *head, int s, map <int, int> &table);
 
 
@@ -128,7 +133,7 @@ int main(int argc, char *argv[]) {
     }
     
     cout << "Reading the file...\n";
-    vector <TreeNode*> vals = getCount(f);
+    priority_queue <TreeNode*, vector <TreeNode*>, PQComp> vals = getCount(f);
     f.close();
     clock_t readingFile = clock() - programTime;
     cout << "Done reading the file!: " << readingFile/1000.0 << "\n\n";
@@ -202,8 +207,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-vector <TreeNode*> getCount(ifstream &f)
-{
+priority_queue <TreeNode*, vector <TreeNode*>, PQComp> getCount(ifstream &f) {
     map <int, int> counter = {};
     int buffer;
     while (buffer = f.get()) {
@@ -211,52 +215,20 @@ vector <TreeNode*> getCount(ifstream &f)
         counter[buffer]++;
     }
     
-    vector <TreeNode*> vals;
-    for (auto element : counter)
-        vals.push_back(new TreeNode (element.first, element.second));
-    return bubbleSort(vals);
+    priority_queue <TreeNode*, vector <TreeNode*>, PQComp> pq;
+    for (auto element : counter) 
+        pq.push(new TreeNode(element.first, element.second));
+    return pq;
 }
 
-vector <TreeNode*> bubbleSort(vector <TreeNode*> vals)
-{
-    int N = vals.size(), last = N;
-    bool changes = 0;
-    do {
-        changes = 0;
-        for (int i = 0; i < last - 1; i++) {
-            if (vals[i]->weight < vals[i + 1]->weight) {
-                swap(vals[i], vals[i + 1]);
-                changes = 1;
-            }
-        }
-        last--;
-    } while (changes && last >= 1);
-    return vals;
-}
-
-TreeNode* makeHuffTree(vector <TreeNode*> vals)
-{
-    vals.push_back(new TreeNode(-1, 1));
-    while (vals.size() > 1) {
-        TreeNode *smallestVal = vals.back();
-        vals.pop_back();
-        
-        TreeNode *secondSmallestVal = vals.back();
-        vals.pop_back();
-
-        TreeNode *node = new TreeNode(-1, smallestVal->weight + secondSmallestVal->weight, smallestVal, secondSmallestVal);
-
-        int r = vals.size() - 1, l = 0;
-        while (l < r) {
-            int m = l + (r - l)/2;
-            if (vals[m]->weight > node->weight)
-                l = m + 1;
-            else 
-                r = m;
-        }
-        vals.insert(vals.begin() + l, node);
+TreeNode* makeHuffTree(priority_queue <TreeNode*, vector <TreeNode*>, PQComp> pq) {
+    pq.push(new TreeNode(-1, 1));
+    while (pq.size() > 1) {
+        TreeNode *a = pq.top(); pq.pop();        
+        TreeNode *b = pq.top(); pq.pop();
+        pq.push(new TreeNode(-1, a->weight + b->weight, a, b));
     }
-    return vals[0];
+    return pq.top();
 }
 
 void makeTable (TreeNode *head, int i, map <int, int> &table)
