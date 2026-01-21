@@ -1,35 +1,38 @@
+/*
+
+there's soemthing wrong with the ownership an unique pointers, solve dat thing, when you have time ig.
+-Eyad
+
+*/
+
+
+
+
+
 #include <algorithm>
-#include <cmath>
 #include <cstdint>
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <unordered_map>
 #include <queue>
 #include <string>
-#include <vector>
 
 class TreeNode {
     public:
         int val, weight;
-        TreeNode *right, *left; // unique_ptr<TreeNode> ??
-        TreeNode (int v, int w, TreeNode *l = nullptr, TreeNode *r = nullptr) {
+        std::shared_ptr <TreeNode>  right, left; // std::unique_ptr<TreeNode> ??
+        TreeNode (int v, int w, std::shared_ptr <TreeNode>  l = nullptr, std::shared_ptr <TreeNode>  r = nullptr) {
             val = v;
             weight = w;
-            left = l;
-            right = r;
-
-        }
-        void delTreeNode(TreeNode *head) {
-            if (head == nullptr) return;
-            delTreeNode(head->left);
-            delTreeNode(head->right);
-            delete head;
+            left  = std::move(l);
+            right = std::move(r);
         }
 };
 
 struct PQComp {
-    bool operator() (const TreeNode *a, const TreeNode *b) const {
+    bool operator() (const std::shared_ptr <TreeNode> &a, const std::shared_ptr <TreeNode> &b) const {
         return a->weight > b->weight;
     }
 };
@@ -112,9 +115,9 @@ class BitReader {
 };
 
 
-std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> getCount(std::ifstream &f);
-TreeNode* makeHuffTree(std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> pq);
-void makeTable (TreeNode *head, int s, std::unordered_map <int, int> &table);
+std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> getCount(std::ifstream &f);
+std::shared_ptr <TreeNode> makeHuffTree(std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> pq);
+void makeTable (std::shared_ptr <TreeNode> head, int i, std::unordered_map <int, int> &table);
 
 
 int main(int argc, char *argv[]) {
@@ -131,18 +134,17 @@ int main(int argc, char *argv[]) {
     }
     
     std::cout << "Reading the file...\n";
-    std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> vals = getCount(f);
+    std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> vals = getCount(f);
     f.close();
     clock_t readingFile = clock() - programTime;
     std::cout << "Done reading the file!: " << readingFile/1000.0 << "\n\n";
 
     std::cout << "Making the encoding tree...\n";
-    TreeNode *head = makeHuffTree(vals);
+    std::shared_ptr <TreeNode> head = makeHuffTree(vals);
 
     std::cout << "Making the encoding table...\n";
     std::unordered_map <int, int> table = {};
     makeTable(head, 1, table); // 1 = 00000001 in binary
-    head->delTreeNode(head);
 
     clock_t treeAndTableTime = clock() - programTime - readingFile;
     std::cout << "Done making the huffman tree and table!: " << treeAndTableTime/1000.0 << "\n\n";
@@ -206,7 +208,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> getCount(std::ifstream &f) {
+std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> getCount(std::ifstream &f) {
     std::unordered_map <int, int> counter = {};
     int buffer;
     while (buffer = f.get()) {
@@ -214,23 +216,23 @@ std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> getCount(std::i
         counter[buffer]++;
     }
 
-    std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> pq;
+    std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> pq;
     for (auto element : counter) 
-        pq.push(new TreeNode(element.first, element.second));
+        pq.push(std::make_shared <TreeNode> (element.first, element.second));
     return pq;
 }
 
-TreeNode* makeHuffTree(std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> pq) {
-    pq.push(new TreeNode(-1, 1));
+std::shared_ptr <TreeNode> makeHuffTree(std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> pq) {
+    pq.push(std::make_shared <TreeNode> (-1, 1));
     while (pq.size() > 1) {
-        TreeNode *a = pq.top(); pq.pop();        
-        TreeNode *b = pq.top(); pq.pop();
-        pq.push(new TreeNode(-1, a->weight + b->weight, a, b));
+        std::shared_ptr <TreeNode> a = pq.top(); pq.pop();        
+        std::shared_ptr <TreeNode> b = pq.top(); pq.pop();
+        pq.push(std::make_shared <TreeNode> (-1, a->weight + b->weight, a, b));
     }
     return pq.top();
 }
 
-void makeTable (TreeNode *head, int i, std::unordered_map <int, int> &table)
+void makeTable (std::shared_ptr <TreeNode> head, int i, std::unordered_map <int, int> &table)
 {
     if (!head) return;
     if (!head->left && !head->right) {
