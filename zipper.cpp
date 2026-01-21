@@ -4,11 +4,10 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <queue>
 #include <string>
-
-using namespace std;
+#include <vector>
 
 class TreeNode {
     public:
@@ -51,24 +50,24 @@ class BitWriter {
             bufferSizeInBits = bufferSizeInBytes * 8;
         }
 
-        void bitStorer (ofstream &f, uint16_t i) {
+        void bitStorer (std::ofstream &f, uint16_t charInput) {
             int lenInBits = -1;
-            uint16_t temp = i;
-            while (temp > 0) {
+            uint16_t tempCharHolder = charInput;
+            while (tempCharHolder > 0) {
                 lenInBits++;
-                temp >>= 1;
+                tempCharHolder >>= 1;
             }
 
             lengthOfBits += lenInBits;
-            i ^= (1 << lenInBits);
-            bits = ((bits << lenInBits) | i);
+            charInput ^= (1 << lenInBits);
+            bits = ((bits << lenInBits) | charInput);
 
             while (lengthOfBits >= bufferSizeInBits) {
                 bitWriter(f);
             }
         }
 
-        void bitWriter (ofstream &f) {
+        void bitWriter (std::ofstream &f) {
             int shift = lengthOfBits - bufferSizeInBits;
             buffer = (bits >> (shift));
             f.write((reinterpret_cast<char*> (&buffer)), bufferSizeInBytes);
@@ -78,7 +77,7 @@ class BitWriter {
             buffer = 0;
         }
 
-        void flushBitWriter (ofstream &f) {
+        void flushBitWriter (std::ofstream &f) {
             if (lengthOfBits > 0) {
                 buffer = (bits << (bufferSizeInBits - lengthOfBits));
                 f.write((reinterpret_cast<char*> (&buffer)), bufferSizeInBytes);
@@ -95,7 +94,7 @@ class BitReader {
             buffer = 1;
         }
 
-        bool readBits(ofstream &f, uint8_t chunk, map <int, int> &table) {
+        bool readBits(std::ofstream &f, uint8_t chunk, std::unordered_map <int, int> &table) {
             int bufferSizeInBits = sizeof(chunk) * 8;
             for (int i = 0; i < bufferSizeInBits; i++) {
                 buffer <<= 1;
@@ -104,8 +103,7 @@ class BitReader {
                 if (table.find(buffer) != table.end()) {
                     if (table[buffer] == -1) return false; // our EOF, it returns false to signal the reader to stop
         
-                    char c = table[buffer];
-                    f.write(&c, 1);
+                    f.write((char*) &table[buffer], 1);
                     buffer = 1;
                 }
             }
@@ -114,53 +112,53 @@ class BitReader {
 };
 
 
-priority_queue <TreeNode*, vector <TreeNode*>, PQComp> getCount(ifstream &f);
-TreeNode* makeHuffTree(priority_queue <TreeNode*, vector <TreeNode*>, PQComp> pq);
-void makeTable (TreeNode *head, int s, map <int, int> &table);
+std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> getCount(std::ifstream &f);
+TreeNode* makeHuffTree(std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> pq);
+void makeTable (TreeNode *head, int s, std::unordered_map <int, int> &table);
 
 
 int main(int argc, char *argv[]) {
     clock_t programTime = clock();
     if (argc != 2) {
-        cout << "Proper use: ./zipper fileName\nPlease try again\n";
+        std::cout << "Proper use: ./zipper fileName\nPlease try again\n";
         return 1; 
     }
-    ifstream f (argv[1], ios::binary);
-    // ifstream f ("test.txt", ios::binary);
+    std::ifstream f (argv[1], std::ios::binary);
+    // std::ifstream f ("test.txt", std::ios::binary);
     if (!f) {
-        cout << "Error: Could not read the file\n";
+        std::cout << "Error: Could not read the file\n";
         return 1;
     }
     
-    cout << "Reading the file...\n";
-    priority_queue <TreeNode*, vector <TreeNode*>, PQComp> vals = getCount(f);
+    std::cout << "Reading the file...\n";
+    std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> vals = getCount(f);
     f.close();
     clock_t readingFile = clock() - programTime;
-    cout << "Done reading the file!: " << readingFile/1000.0 << "\n\n";
+    std::cout << "Done reading the file!: " << readingFile/1000.0 << "\n\n";
 
-    cout << "Making the encoding tree...\n";
+    std::cout << "Making the encoding tree...\n";
     TreeNode *head = makeHuffTree(vals);
 
-    cout << "Making the encoding table...\n";
-    map <int, int> table = {};
+    std::cout << "Making the encoding table...\n";
+    std::unordered_map <int, int> table = {};
     makeTable(head, 1, table); // 1 = 00000001 in binary
     head->delTreeNode(head);
 
     clock_t treeAndTableTime = clock() - programTime - readingFile;
-    cout << "Done making the huffman tree and table!: " << treeAndTableTime/1000.0 << "\n\n";
+    std::cout << "Done making the huffman tree and table!: " << treeAndTableTime/1000.0 << "\n\n";
 
-    ofstream o ("output.bin", ios::binary);
+    std::ofstream o ("output.bin", std::ios::binary);
 
-    ifstream d(argv[1], ios::binary);
-    // ifstream d("test.txt", ios::binary);
+    std::ifstream d(argv[1], std::ios::binary);
+    // std::ifstream d("test.txt", std::ios::binary);
     if (!d || !o) {
-        cout << "Error: Could not read the file\n";
+        std::cout << "Error: Could not read the file\n";
         return 1;
     }
 
-    cout << "Writing the encoded file...\n";
+    std::cout << "Writing the encoded file...\n";
     int sizeBeforeComp = 0;
-    unsigned int buf;
+    int buf;
     BitWriter bits;
     while (true) {
         buf = d.get();
@@ -174,21 +172,21 @@ int main(int argc, char *argv[]) {
     }
     o.close(); d.close();
     clock_t encodignTime = clock() - programTime - readingFile - treeAndTableTime;
-    cout << "Done writing the encoded file!: " << encodignTime/1000.0 << "\n\n";
+    std::cout << "Done writing the encoded file!: " << encodignTime/1000.0 << "\n\n";
     
-    map <int, int> invTable;
-    for (auto v : table) {
+    std::unordered_map <int, int> invTable;
+    for (const auto &v : table) {
         invTable[v.second] = v.first;
     }
 
-    ofstream ot ("output.txt", ios::binary);
-    ifstream c ("output.bin", ios::binary);
+    std::ofstream ot ("output.txt", std::ios::binary);
+    std::ifstream c ("output.bin", std::ios::binary);
     if (!ot || !c) {
-        cout << "Error: Could not open the file\n";
+        std::cout << "Error: Could not open the file\n";
         return 1;
     }
     
-    cout << "Writing the decoded file...\n";
+    std::cout << "Writing the decoded file...\n";
     BitReader bitsR;
     int sizeAfterComp = 0;
     uint8_t readingBuf;
@@ -198,30 +196,31 @@ int main(int argc, char *argv[]) {
         if (!state) break;
     }
     clock_t decodingTime = clock() - programTime - readingFile - treeAndTableTime - encodignTime;
-    cout << "Done writing the decoded file!: " << decodingTime/1000.0 << "\n\n";
+    std::cout << "Done writing the decoded file!: " << decodingTime/1000.0 << "\n\n";
 
-    cout << string(40, '*') << '\n' << string(18, ' ') << "DONE!\n" << string(40, '*') << "\n\n";
-    cout << "It took the program " << (clock() - programTime)/1000.0 << "s to zip and unzip the file " << argv[1];
-    cout << " which is of size: " << (sizeBeforeComp/1024.0) << "KB before compression, and of size: " << (sizeAfterComp/1024.0) << "KB after cpmpression";
-    cout << "saving " << ((sizeBeforeComp - sizeAfterComp)/ (float) sizeBeforeComp) * 100 << "%\n";
+    std::cout << std::string(40, '*') << '\n' << std::string(18, ' ') << "DONE!\n" << std::string(40, '*') << "\n\n";
+    std::cout << "It took the program " << (clock() - programTime)/1000.0 << "s to zip and unzip the file " << argv[1];
+    std::cout << " which is of size: " << (sizeBeforeComp/1024.0) << "KB before compression, and of size: ";
+    std::cout << (sizeAfterComp/1024.0) << "KB after compression";
+    std::cout << "saving " << ((sizeBeforeComp - sizeAfterComp)/ (float) sizeBeforeComp) * 100 << "%\n";
     return 0;
 }
 
-priority_queue <TreeNode*, vector <TreeNode*>, PQComp> getCount(ifstream &f) {
-    map <int, int> counter = {};
+std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> getCount(std::ifstream &f) {
+    std::unordered_map <int, int> counter = {};
     int buffer;
     while (buffer = f.get()) {
         if (buffer == EOF) break;
         counter[buffer]++;
     }
-    
-    priority_queue <TreeNode*, vector <TreeNode*>, PQComp> pq;
+
+    std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> pq;
     for (auto element : counter) 
         pq.push(new TreeNode(element.first, element.second));
     return pq;
 }
 
-TreeNode* makeHuffTree(priority_queue <TreeNode*, vector <TreeNode*>, PQComp> pq) {
+TreeNode* makeHuffTree(std::priority_queue <TreeNode*, std::vector <TreeNode*>, PQComp> pq) {
     pq.push(new TreeNode(-1, 1));
     while (pq.size() > 1) {
         TreeNode *a = pq.top(); pq.pop();        
@@ -231,7 +230,7 @@ TreeNode* makeHuffTree(priority_queue <TreeNode*, vector <TreeNode*>, PQComp> pq
     return pq.top();
 }
 
-void makeTable (TreeNode *head, int i, map <int, int> &table)
+void makeTable (TreeNode *head, int i, std::unordered_map <int, int> &table)
 {
     if (!head) return;
     if (!head->left && !head->right) {
