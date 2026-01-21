@@ -1,14 +1,3 @@
-/*
-
-there's soemthing wrong with the ownership an unique pointers, solve dat thing, when you have time ig.
--Eyad
-
-*/
-
-
-
-
-
 #include <algorithm>
 #include <cstdint>
 #include <ctime>
