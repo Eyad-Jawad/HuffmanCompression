@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     }
     
     std::unordered_map <int, int> 
-    table = compress(f, argv[1]);
+    table = compress(f, argv[2]);
 
     decompress(table, argv[2]);
     return 0;
@@ -29,7 +29,7 @@ std::unordered_map <int, int> compress (std::ifstream &f, std::string fileName) 
     std::unordered_map <int, int> table = {};
     makeTable(head, 1, table); // 1 = 00000001 in binary, it's called a sentinel bit
 
-    std::ofstream o ("output.bin", std::ios::binary);
+    std::ofstream o ("compressed " + fileName, std::ios::binary);
 
     if (!o) {
         std::cout << "Error: Could not read the file\n";
@@ -57,8 +57,8 @@ void decompress (std::unordered_map <int, int> table, std::string fileName) {
         invTable[v.second] = v.first;
     }
 
-    std::ofstream ot (fileName, std::ios::binary);
-    std::ifstream c ("output.bin", std::ios::binary);
+    std::ofstream ot ("decompressed " + fileName, std::ios::binary);
+    std::ifstream c ("compressed " + fileName, std::ios::binary);
     if (!ot || !c) {
         std::cout << "Error: Could not open the file\n";
         return;
