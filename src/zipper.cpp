@@ -1,4 +1,4 @@
-#include <inc.h>
+#include "inc.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    std::unordered_map <int, int> 
+    std::unordered_map <int, encodedChars> 
     table = compress(f, argv[2]);
 
     decompress(table, argv[2]);
@@ -21,15 +21,15 @@ int main(int argc, char *argv[]) {
 
 
 
-std::unordered_map <int, int> compress (std::ifstream &f, std::string fileName) {
+std::unordered_map <int, encodedChars> compress (std::ifstream &f, std::string fileName) {
     std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> vals = getCount(f);
 
     std::shared_ptr <TreeNode> head = makeHuffTree(vals);
 
-    std::unordered_map <int, int> table = {};
-    makeTable(head, 1, table); // 1 = 00000001 in binary, it's called a sentinel bit
+    std::unordered_map <int, encodedChars> table = {};
+    makeTable(head, 0, 0, table);
 
-    std::ofstream o ("compressed " + fileName, std::ios::binary);
+    std::ofstream o ("compressed " + fileName + ".bin", std::ios::binary);
 
     if (!o) {
         std::cout << "Error: Could not read the file\n";
@@ -50,15 +50,15 @@ std::unordered_map <int, int> compress (std::ifstream &f, std::string fileName) 
     return table;
 }
 
-void decompress (std::unordered_map <int, int> table, std::string fileName) {
+void decompress (std::unordered_map <int, encodedChars> table, std::string fileName) {
     
-    std::unordered_map <int, int> invTable;
-    for (const auto &v : table) {
-        invTable[v.second] = v.first;
+    std::unordered_map <uint64_t, int> invTable;
+    for (auto &v : table) {
+        invTable[v.second.getId()] = v.second.c;
     }
 
     std::ofstream ot ("decompressed " + fileName, std::ios::binary);
-    std::ifstream c ("compressed " + fileName, std::ios::binary);
+    std::ifstream c ("compressed " + fileName + ".bin", std::ios::binary);
     if (!ot || !c) {
         std::cout << "Error: Could not open the file\n";
         return;
@@ -99,15 +99,18 @@ std::shared_ptr <TreeNode> makeHuffTree(std::priority_queue <std::shared_ptr <Tr
     return pq.top();
 }
 
-void makeTable (std::shared_ptr <TreeNode> head, int i, std::unordered_map <int, int> &table) {
+void makeTable (std::shared_ptr <TreeNode> head, int i, int depth, std::unordered_map <int, encodedChars> &table) {
     if (!head) return;
     if (isItALeaf(head)) {
-        table[head->charValueInInt] = i;
+        table[head->charValueInInt].n = i;
+        table[head->charValueInInt].len = depth;
+        table[head->charValueInInt].c = head->charValueInInt;
+
         return;
     }
 
     // 0 for left
     // 1 for right
-    makeTable(head->left,  (i << 1),     table);
-    makeTable(head->right, (i << 1) + 1, table);
+    makeTable(head->left,  (i << 1),     depth + 1, table);
+    makeTable(head->right, (i << 1) + 1, depth + 1, table);
 }

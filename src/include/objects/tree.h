@@ -1,4 +1,5 @@
-#include <iostream>
+#pragma once
+#include "inc.h"
 
 class TreeNode {
     public:
@@ -28,4 +29,16 @@ class TreeNode {
             right = std::move(r);
         }
         // there's no need for destructer since we are using smart pointers
+    
+        void trv(std::shared_ptr <TreeNode> head) {
+            if (!head) {
+                std::cout << "Null\n";
+                return;
+            }
+            std::cout << (int) head->charValueInInt;
+            std::cout << "\nLeft: ";
+            head->trv(head->left);
+            std::cout << "Right: ";
+            head->trv(head->right);
+        }
 };

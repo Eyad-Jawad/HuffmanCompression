@@ -1,5 +1,5 @@
-#include <fstream>
-#include <cstdlib>
+#pragma once
+#include "inc.h"
 
 class BitWriter {
     private:
@@ -21,19 +21,9 @@ class BitWriter {
         // when 8 bits (1 byte) of encodded characters is accumalated
         // and the charInput which is the encodded character
         // it is 16 btis because in huffman coding chars can get quite lengthy
-        void bitStorer (std::ofstream &f, uint16_t charInput) {
-
-            int lenInBits = 0; 
-            uint16_t tempCharHolder = charInput;
-            // it is 1 to ignore the sentinel bit
-            while (tempCharHolder > 1) {
-                lenInBits++;
-                tempCharHolder >>= 1;
-            }
-
-            lengthOfBits += lenInBits;
-            charInput ^= (1 << lenInBits); // remove the sentinel bit
-            bits = ((bits << lenInBits) | charInput);
+        void bitStorer (std::ofstream &f, encodedChars charInput) {
+            lengthOfBits += charInput.len;
+            bits = ((bits << charInput.len) | charInput.n);
 
             while (lengthOfBits >= bufferSizeInBits) {
                 bitWriter(f);

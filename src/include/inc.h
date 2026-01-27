@@ -3,6 +3,7 @@
 
 
 #include <algorithm>
+#include <cstdlib>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -12,23 +13,15 @@
 #include <string>
 #include <vector>
 
-
+#include "types/encodedchars.h"
 #include "objects/bitwriter.h"
 #include "objects/bitreader.h"
 #include "objects/tree.h"
+#include "types/pqcomp.h"
 
 inline bool isItALeaf(std::shared_ptr <TreeNode> head) {
     return !head->left && !head->right;
 }
-
-struct PQComp {
-    bool operator() (
-        const std::shared_ptr <TreeNode> &a, 
-        const std::shared_ptr <TreeNode> &b
-      ) const {
-        return a->weightOfChar > b->weightOfChar;
-    }
-};
 
 std::priority_queue <
     std::shared_ptr <TreeNode>, 
@@ -46,17 +39,18 @@ std::shared_ptr <TreeNode> makeHuffTree(
 
 void makeTable (
     std::shared_ptr <TreeNode> head, 
-    int i, 
-    std::unordered_map <int, int> &table
+    int i,
+    int depth,
+    std::unordered_map <int, encodedChars> &table
 );
 
-std::unordered_map <int, int> compress (
+std::unordered_map <int, encodedChars> compress (
     std::ifstream &f, 
     std::string fileName
 );
 
 void decompress (
-    std::unordered_map <int, int> table,
+    std::unordered_map <int, encodedChars> table,
     std::string fileName
 );
 

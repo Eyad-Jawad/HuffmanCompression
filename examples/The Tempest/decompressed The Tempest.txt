@@ -49,7 +49,7 @@ numbers are from the original text; line breaks in dialogue--including
 prose passages--are unchanged. Brackets are also unchanged; to avoid
 ambiguity, footnotes and linenotes are given without added brackets.
 In the notes, numerals printed as subscripts are shown inline as
-F1, F2, :ot7F h.
+F1, F2, Q1....
 
 Texts cited in the Notes are listed at the end of the e-text.]
 
@@ -1062,7 +1062,7 @@ _Pros._ Come, follow. Speak not for him.    [_Exeunt._
   31: _betid_] F1. _betide_ F2 F3 F4.
   35: _a_] F1. _the_ F2 F3 F4.
   38: _thou_] om. Pope.
-  41: _Out_] _Full_ Pope (after Dryden). _:ottron_ Collier MS.
+  41: _Out_] _Full_ Pope (after Dryden). _Quite_ Collier MS.
   44: _with_] _in_ Pope (after Dryden).
   53: _Twelve year ... year_] _Tis twelve years ... years_ Pope.
   58, 59: _and his only heir And princess_] _and his only heir
@@ -3195,7 +3195,7 @@ Follow, and do me service.    [_Exeunt._
   41: _vanity_] _rarity_ S. Walker conj.
   48: _no_?] _no_. Rowe.
   53: _abstemious_] _abstenious_ F1.
-  60: SCENE III. A MAS:oty E . Pope.]
+  60: SCENE III. A MASQUE. Pope.]
   _thy_] F1. _the_ F2 F3 F4.
   64: _pioned_] _pionied_ Warburton. _peonied_ Steevens.
   _twilled_] _tulip’d_ Rowe. _tilled_ Capell (Holt conj.). _lilied_
@@ -4349,7 +4349,7 @@ fees. YOU AGREE THAT YOU HAVE NO REMEDIES FOR NEGLIGENCE, STRICT
 LIABILITY, BREACH OF WARRANTY OR BREACH OF CONTRACT EXCEPT THOSE
 PROVIDED IN PARAGRAPH 1.F.3. YOU AGREE THAT THE FOUNDATION, THE
 TRADEMARK OWNER, AND ANY DISTRIBUTOR UNDER THIS AGREEMENT WILL NOT BE
-LIABLE TO YOU FOR ACTUAL, DIRECT, INDIRECT, CONSE:oty E NTIAL, PUNITIVE OR
+LIABLE TO YOU FOR ACTUAL, DIRECT, INDIRECT, CONSEQUENTIAL, PUNITIVE OR
 INCIDENTAL DAMAGES EVEN IF YOU GIVE NOTICE OF THE POSSIBILITY OF SUCH
 DAMAGE.
 
@@ -4482,4 +4482,4 @@ Archive Foundation, how to help produce our new eBooks, and how to
 subscribe to our email newsletter to hear about new eBooks.
 
 
-ooi:of
+ooi
