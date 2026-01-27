@@ -24,6 +24,9 @@ src/
             tree.h
             bitwriter.h
             bitreader.h
+        types/
+            encodedchars.h
+            pqcomp.h
 examples/
     has some text files for testing
 ````
