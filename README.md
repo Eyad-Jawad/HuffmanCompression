@@ -53,29 +53,29 @@ These numbers are from my machine, and if you could notice the last file the com
 ---
 
 ***[Adventures of Sherlock Holmes](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/Adventures%20of%20Sherlock%20Holmes)***:
-```
-Size before comperssion: **608kb**
-Size after comperssion: **357kb**
+
+Size before comperssion: **608kb**  
+Size after comperssion: **357kb**  
 Time: **1.048s**
-```
+
 
 ---
 
 ***[The Tempest](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/The%20Tempest)***:
-```
-Size before comperssion: **171kb**
-Size after comperssion: **102kb**
+
+Size before comperssion: **171kb**  
+Size after comperssion: **102kb**  
 Time: **0.324s**
-```
+
 
 ---
 
 ***[Ranodm](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/random)***:
-```
-Size before comperssion: **9766kb**
-Size after comperssion: **8133kb**
+
+Size before comperssion: **9766kb**  
+Size after comperssion: **8133kb**  
 Time: **16.288s**
-```
+
 
 ---
 
