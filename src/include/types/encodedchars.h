@@ -4,7 +4,6 @@
 struct encodedChars {
     uint32_t n;
     uint8_t len;
-    int c;
 
     uint64_t getId () {
         

@@ -44,13 +44,13 @@ void makeTable (
     std::unordered_map <int, encodedChars> &table
 );
 
-std::unordered_map <int, encodedChars> compress (
+std::unordered_map <uint64_t, int> compress (
     std::ifstream &f, 
     std::string fileName
 );
 
 void decompress (
-    std::unordered_map <int, encodedChars> table,
+    std::unordered_map <uint64_t, int> table,
     std::string fileName
 );
 

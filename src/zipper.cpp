@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    std::unordered_map <int, encodedChars> 
+    std::unordered_map <uint64_t, int> 
     table = compress(f, argv[2]);
 
     decompress(table, argv[2]);
@@ -21,19 +21,24 @@ int main(int argc, char *argv[]) {
 
 
 
-std::unordered_map <int, encodedChars> compress (std::ifstream &f, std::string fileName) {
+std::unordered_map <uint64_t, int> compress (std::ifstream &f, std::string fileName) {
     std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> vals = getCount(f);
 
     std::shared_ptr <TreeNode> head = makeHuffTree(vals);
 
     std::unordered_map <int, encodedChars> table = {};
     makeTable(head, 0, 0, table);
-
+    
+    std::unordered_map <uint64_t, int> invtable = {};
+    for (auto &v : table) {
+        invtable[v.second.getId()] = v.first;
+    }
+    
     std::ofstream o ("compressed " + fileName + ".bin", std::ios::binary);
 
     if (!o) {
         std::cout << "Error: Could not read the file\n";
-        return table;
+        return invtable;
     }
     f.clear();
     f.seekg(0, std::ios::beg); // reset the count reader
@@ -47,16 +52,10 @@ std::unordered_map <int, encodedChars> compress (std::ifstream &f, std::string f
     bits.flushBitWriter(o);
 
     o.close(); f.close();
-    return table;
+    return invtable;
 }
 
-void decompress (std::unordered_map <int, encodedChars> table, std::string fileName) {
-    
-    std::unordered_map <uint64_t, int> invTable;
-    for (auto &v : table) {
-        invTable[v.second.getId()] = v.second.c;
-    }
-
+void decompress (std::unordered_map <uint64_t, int> table, std::string fileName) {
     std::ofstream ot ("decompressed " + fileName, std::ios::binary);
     std::ifstream c ("compressed " + fileName + ".bin", std::ios::binary);
     if (!ot || !c) {
@@ -67,7 +66,7 @@ void decompress (std::unordered_map <int, encodedChars> table, std::string fileN
     BitReader bitsR;
     uint8_t readingBuf;
     while (c.read(reinterpret_cast<char*>(&readingBuf), 1)) {
-        bool state = bitsR.readBits(ot, readingBuf, invTable);
+        bool state = bitsR.readBits(ot, readingBuf, table);
         if (!state) break; // reached the EOF
     }
 }
@@ -104,7 +103,6 @@ void makeTable (std::shared_ptr <TreeNode> head, int i, int depth, std::unordere
     if (isItALeaf(head)) {
         table[head->charValueInInt].n = i;
         table[head->charValueInInt].len = depth;
-        table[head->charValueInInt].c = head->charValueInInt;
 
         return;
     }
