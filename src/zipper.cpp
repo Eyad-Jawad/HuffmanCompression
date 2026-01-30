@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
 
     std::ifstream f (argv[1], std::ios::binary);
     if (!f) {
-        std::cout << "Error: Could not read the file\n";
+        std::cout << "Error: the file is empty!\n";
         return 1;
     }
 
@@ -32,33 +32,12 @@ void compress (std::ifstream &f, std::string fileName) {
     std::ofstream o ("compressed " + fileName + ".bin", std::ios::binary);
 
     if (!o) {
-        std::cout << "Error: Could not read the file\n";
+        std::cout << "Error: Could not open a file for compression\n";
         return;
     }
 
-    /*
-        ============================================
-        FILE STRUCTURE: (14 bytes)
-        HUF (The header) (3 bytes)
-        File size before compression (4 bytes)
-        number of unique symbols (2 bytes)
-        encoding table:
-            character value in ascii (1 byte)
-            its encoded value or bits (4 bytes)
-            the length of bytes because its hard to use bits in c++ (1 byte)
-        compressed file
-        ============================================
-    */
+    writeHeader(o, table, fileSize);
 
-    o.write("HUF", 3); // signature
-    writeBytes<int>(o, fileSize); 
-    uint16_t uniqueSymbols = static_cast<uint16_t> (table.size());
-    writeBytes<uint16_t>(o, uniqueSymbols);
-    for (auto &v : table) {
-        writeBytes<uint8_t> (o, v.first);       // ascii character's value
-        writeBytes<uint32_t>(o, v.second.n);    // the encoded bits
-        writeBytes<uint8_t> (o, v.second.len);  // the length of the actual bits
-    }
     f.clear();
     f.seekg(0, std::ios::beg); // reset the count reader
 
@@ -76,8 +55,12 @@ void compress (std::ifstream &f, std::string fileName) {
 void decompress (std::string fileName) {
     std::ofstream ot ("decompressed " + fileName,        std::ios::binary);
     std::ifstream c  ("compressed " + fileName + ".bin", std::ios::binary);
-    if (!ot || !c) {
-        std::cout << "Error: Could not open the file\n";
+    if (!c) {
+        std::cout << "Error: Could not open the comperssed file\n";
+        return;
+    }
+    if (!ot) {
+        std::cout << "Error: could not open a file for decompression\n";
         return;
     }
 
@@ -89,37 +72,19 @@ void decompress (std::string fileName) {
     }
 
     int fileSizeBeforeCompression;
-    c.read(reinterpret_cast<char*>(&fileSizeBeforeCompression), 4);
     std::unordered_map <uint64_t, int> table = {};
-
-    uint16_t uniqueSymbols;
-    c.read(reinterpret_cast<char*>(&uniqueSymbols), 2);
-    
-    // reading the encoding table
-    for (int _ = 0; _ < uniqueSymbols; _++) {
-        uint8_t character;
-        uint32_t bits;
-        uint8_t bitLen;
-        c.read(reinterpret_cast<char*>(&character), 1);
-        c.read(reinterpret_cast<char*>(&bits), 4);
-        c.read(reinterpret_cast<char*>(&bitLen), 1);
-        encodedChars c;
-        c.n = bits;
-        c.len = bitLen;
-        table[c.getId()] = character;
-    }
+    readHeader(c, table, fileSizeBeforeCompression);
 
     BitReader bitsR;
     uint8_t chunk;
     while (fileSizeBeforeCompression > 0) {
         c.read(reinterpret_cast<char*>(&chunk), 1);
         bitsR.readBits(ot, chunk, table, fileSizeBeforeCompression);
-        
-        // each symbol decoded is a byte from the original size
-        // and this method decrements it until it has decoded
-        // the whole file and thus file size is 0, that's why we don't
-        // need and EOF
     }
+    // each symbol decoded is a byte from the original size
+    // and this method decrements it until it has decoded
+    // the whole file and thus file size is 0, that's why we don't
+    // need an EOF
 }
 
 std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> getCount(std::ifstream &f, int &fileSize) {
@@ -162,4 +127,51 @@ void makeTable (std::shared_ptr <TreeNode> head, int i, int depth, std::unordere
     // 1 for right
     makeTable(head->left,  (i << 1),     depth + 1, table);
     makeTable(head->right, (i << 1) + 1, depth + 1, table);
+}
+
+void writeHeader (std::ofstream &o, std::unordered_map <int, encodedChars> &table, int &fileSize) {
+    /*
+        ============================================
+        FILE STRUCTURE: (14 bytes)
+        HUF (The header) (3 bytes)
+        File size before compression (4 bytes)
+        number of unique symbols (2 bytes)
+        encoding table:
+            character value in ascii (1 byte)
+            its encoded value or bits (4 bytes)
+            the length of bytes because its hard to use bits in c++ (1 byte)
+        compressed file
+        ============================================
+    */
+
+    o.write("HUF", 3); // signature
+    writeBytes<int>(o, fileSize); 
+    uint16_t uniqueSymbols = static_cast<uint16_t> (table.size());
+    writeBytes<uint16_t>(o, uniqueSymbols);
+    for (auto &v : table) {
+        writeBytes<uint8_t> (o, v.first);       // ascii character's value
+        writeBytes<uint32_t>(o, v.second.n);    // the encoded bits
+        writeBytes<uint8_t> (o, v.second.len);  // the length of the actual bits
+    }
+}
+
+void readHeader (std::ifstream &c, std::unordered_map <uint64_t, int> &table, int &fileSizeBeforeCompression) {
+    c.read(reinterpret_cast<char*>(&fileSizeBeforeCompression), 4);
+
+    uint16_t uniqueSymbols;
+    c.read(reinterpret_cast<char*>(&uniqueSymbols), 2);
+    
+    // reading the encoding table
+    for (int _ = 0; _ < uniqueSymbols; _++) {
+        uint8_t character;
+        uint32_t bits;
+        uint8_t bitLen;
+        c.read(reinterpret_cast<char*>(&character), 1);
+        c.read(reinterpret_cast<char*>(&bits), 4);
+        c.read(reinterpret_cast<char*>(&bitLen), 1);
+        encodedChars c;
+        c.n = bits;
+        c.len = bitLen;
+        table[c.getId()] = character;
+    }
 }

@@ -29,6 +29,18 @@ inline void writeBytes(std::ofstream &f, T buffer) {
     f.write(reinterpret_cast<const char*>(&n), sizeof(n));
 }
 
+void writeHeader (
+    std::ofstream &o, 
+    std::unordered_map <int, encodedChars> &table, 
+    int &fileSize
+);
+
+void readHeader (
+    std::ifstream &c, 
+    std::unordered_map <uint64_t, int> &table, 
+    int &fileSizeBeforeCompression
+);
+
 std::priority_queue <
     std::shared_ptr <TreeNode>, 
     std::vector <std::shared_ptr <TreeNode>>, 
