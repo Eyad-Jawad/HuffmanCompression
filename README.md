@@ -1,7 +1,7 @@
 # HuffMan Encoding
 
 ## What Can It Do?
-It can compress and decompress text files, it is pretty useless since I do not write the encoding table or tree in the compressed file, but it can decrease text files' size by a great margin (about 30% ~ 40% in my tests)
+It can compress and decompress text files. It can decrease text files' size by a great margin (about 30% ~ 40% in my tests)
 
 ## How to Use It?
 To use it you just have to say:  
