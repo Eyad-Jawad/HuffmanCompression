@@ -19,7 +19,7 @@ FILE STRUCTURE:
 The header (14 bytes)
 HUF (signature) (3 bytes)
 File size before compression (4 bytes)
-number of unique symbols (1 byte)
+number of unique symbols (2 bytes)
 encoding table:
     character value in ascii (1 byte)
     its encoded value or bits (4 bytes)
@@ -74,7 +74,7 @@ These numbers are from my machine, and if you could notice the last file the com
 
 Size before comperssion: **608kb**  
 Size after comperssion: **357kb**  
-Time: **1.048s**
+Time: **0.582s**
 
 
 ---
@@ -83,7 +83,7 @@ Time: **1.048s**
 
 Size before comperssion: **171kb**  
 Size after comperssion: **102kb**  
-Time: **0.324s**
+Time: **0.298s**
 
 
 ---
@@ -92,7 +92,7 @@ Time: **0.324s**
 
 Size before comperssion: **9766kb**  
 Size after comperssion: **8133kb**  
-Time: **16.288s**
+Time: **10.084s**
 
 
 ---

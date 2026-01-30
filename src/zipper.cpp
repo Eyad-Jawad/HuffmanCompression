@@ -41,7 +41,7 @@ void compress (std::ifstream &f, std::string fileName) {
         FILE STRUCTURE: (14 bytes)
         HUF (The header) (3 bytes)
         File size before compression (4 bytes)
-        number of unique symbols (1 byte)
+        number of unique symbols (2 bytes)
         encoding table:
             character value in ascii (1 byte)
             its encoded value or bits (4 bytes)
@@ -52,8 +52,8 @@ void compress (std::ifstream &f, std::string fileName) {
 
     o.write("HUF", 3); // signature
     writeBytes<int>(o, fileSize); 
-    uint8_t uniqueSymbols = static_cast<uint8_t> (table.size());
-    writeBytes<uint8_t>(o, uniqueSymbols);
+    uint16_t uniqueSymbols = static_cast<uint16_t> (table.size());
+    writeBytes<uint16_t>(o, uniqueSymbols);
     for (auto &v : table) {
         writeBytes<uint8_t> (o, v.first);       // ascii character's value
         writeBytes<uint32_t>(o, v.second.n);    // the encoded bits
@@ -92,8 +92,8 @@ void decompress (std::string fileName) {
     c.read(reinterpret_cast<char*>(&fileSizeBeforeCompression), 4);
     std::unordered_map <uint64_t, int> table = {};
 
-    uint8_t uniqueSymbols;
-    c.read(reinterpret_cast<char*>(&uniqueSymbols), 1);
+    uint16_t uniqueSymbols;
+    c.read(reinterpret_cast<char*>(&uniqueSymbols), 2);
     
     // reading the encoding table
     for (int _ = 0; _ < uniqueSymbols; _++) {
