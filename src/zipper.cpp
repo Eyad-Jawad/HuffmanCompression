@@ -50,14 +50,14 @@ void compress (std::ifstream &f, std::string fileName) {
         ============================================
     */
 
-    o.write("HUF", 3);
-    writeBytes<int>(o, fileSize);
+    o.write("HUF", 3); // signature
+    writeBytes<int>(o, fileSize); 
     uint8_t uniqueSymbols = static_cast<uint8_t> (table.size());
     writeBytes<uint8_t>(o, uniqueSymbols);
     for (auto &v : table) {
-        writeBytes<uint8_t> (o, v.first);
-        writeBytes<uint32_t>(o, v.second.n);
-        writeBytes<uint8_t> (o, v.second.len);
+        writeBytes<uint8_t> (o, v.first);       // ascii character's value
+        writeBytes<uint32_t>(o, v.second.n);    // the encoded bits
+        writeBytes<uint8_t> (o, v.second.len);  // the length of the actual bits
     }
     f.clear();
     f.seekg(0, std::ios::beg); // reset the count reader
@@ -87,6 +87,7 @@ void decompress (std::string fileName) {
         std::cout << "Error: This file is not huffman encoded";
         return;
     }
+
     int fileSizeBeforeCompression;
     c.read(reinterpret_cast<char*>(&fileSizeBeforeCompression), 4);
     std::unordered_map <uint64_t, int> table = {};
@@ -94,6 +95,7 @@ void decompress (std::string fileName) {
     uint8_t uniqueSymbols;
     c.read(reinterpret_cast<char*>(&uniqueSymbols), 1);
     
+    // reading the encoding table
     for (int _ = 0; _ < uniqueSymbols; _++) {
         uint8_t character;
         uint32_t bits;
@@ -112,6 +114,11 @@ void decompress (std::string fileName) {
     while (fileSizeBeforeCompression > 0) {
         c.read(reinterpret_cast<char*>(&chunk), 1);
         bitsR.readBits(ot, chunk, table, fileSizeBeforeCompression);
+        
+        // each symbol decoded is a byte from the original size
+        // and this method decrements it until it has decoded
+        // the whole file and thus file size is 0, that's why we don't
+        // need and EOF
     }
 }
 
