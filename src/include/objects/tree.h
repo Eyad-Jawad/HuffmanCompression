@@ -3,7 +3,8 @@
 
 class TreeNode {
     public:
-        int charValueInInt, weightOfChar; 
+        uint8_t charValueInInt;
+        int weightOfChar; 
         /* 
         the first one is simply the ascii value of the character, 
         with the exception of the EOF which is hard-codded to -1.
@@ -18,7 +19,7 @@ class TreeNode {
         // for the Huffman tree
 
         // the constructer:
-        TreeNode (int v, int w, 
+        TreeNode (uint8_t v, int w, 
             std::shared_ptr <TreeNode> l = nullptr, 
             std::shared_ptr <TreeNode> r = nullptr) {
 

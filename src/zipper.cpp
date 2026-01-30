@@ -11,34 +11,53 @@ int main(int argc, char *argv[]) {
         std::cout << "Error: Could not read the file\n";
         return 1;
     }
-    
-    std::unordered_map <uint64_t, int> 
-    table = compress(f, argv[2]);
 
-    decompress(table, argv[2]);
+    compress(f, argv[2]);
+
+    decompress(argv[2]);
     return 0;
 }
 
 
 
-std::unordered_map <uint64_t, int> compress (std::ifstream &f, std::string fileName) {
-    std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> vals = getCount(f);
+void compress (std::ifstream &f, std::string fileName) {
+    int fileSize = 0;
+    std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> vals = getCount(f, fileSize);
 
     std::shared_ptr <TreeNode> head = makeHuffTree(vals);
 
     std::unordered_map <int, encodedChars> table = {};
     makeTable(head, 0, 0, table);
-    
-    std::unordered_map <uint64_t, int> invtable = {};
-    for (auto &v : table) {
-        invtable[v.second.getId()] = v.first;
-    }
-    
+
     std::ofstream o ("compressed " + fileName + ".bin", std::ios::binary);
 
     if (!o) {
         std::cout << "Error: Could not read the file\n";
-        return invtable;
+        return;
+    }
+
+    /*
+        ============================================
+        FILE STRUCTURE: (14 bytes)
+        HUF (The header) (3 bytes)
+        File size before compression (4 bytes)
+        number of unique symbols (1 byte)
+        encoding table:
+            character value in ascii (1 byte)
+            its encoded value or bits (4 bytes)
+            the length of bytes because its hard to use bits in c++ (1 byte)
+        compressed file
+        ============================================
+    */
+
+    o.write("HUF", 3);
+    writeBytes<int>(o, fileSize);
+    uint8_t uniqueSymbols = static_cast<uint8_t> (table.size());
+    writeBytes<uint8_t>(o, uniqueSymbols);
+    for (auto &v : table) {
+        writeBytes<uint8_t> (o, v.first);
+        writeBytes<uint32_t>(o, v.second.n);
+        writeBytes<uint8_t> (o, v.second.len);
     }
     f.clear();
     f.seekg(0, std::ios::beg); // reset the count reader
@@ -48,34 +67,60 @@ std::unordered_map <uint64_t, int> compress (std::ifstream &f, std::string fileN
     while ((buf = f.get()) != EOF) {
         bits.bitStorer(o, table[buf]);
     }
-    bits.bitStorer(o, table[-1]); // the hard-codded EOF
     bits.flushBitWriter(o);
 
     o.close(); f.close();
-    return invtable;
+    return;
 }
 
-void decompress (std::unordered_map <uint64_t, int> table, std::string fileName) {
-    std::ofstream ot ("decompressed " + fileName, std::ios::binary);
-    std::ifstream c ("compressed " + fileName + ".bin", std::ios::binary);
+void decompress (std::string fileName) {
+    std::ofstream ot ("decompressed " + fileName,        std::ios::binary);
+    std::ifstream c  ("compressed " + fileName + ".bin", std::ios::binary);
     if (!ot || !c) {
         std::cout << "Error: Could not open the file\n";
         return;
     }
+
+    char header[3];
+    c.read(header, 3);
+    if (header[0] != 'H' || header[1] != 'U' || header[2] != 'F') {
+        std::cout << "Error: This file is not huffman encoded";
+        return;
+    }
+    int fileSizeBeforeCompression;
+    c.read(reinterpret_cast<char*>(&fileSizeBeforeCompression), 4);
+    std::unordered_map <uint64_t, int> table = {};
+
+    uint8_t uniqueSymbols;
+    c.read(reinterpret_cast<char*>(&uniqueSymbols), 1);
     
+    for (int _ = 0; _ < uniqueSymbols; _++) {
+        uint8_t character;
+        uint32_t bits;
+        uint8_t bitLen;
+        c.read(reinterpret_cast<char*>(&character), 1);
+        c.read(reinterpret_cast<char*>(&bits), 4);
+        c.read(reinterpret_cast<char*>(&bitLen), 1);
+        encodedChars c;
+        c.n = bits;
+        c.len = bitLen;
+        table[c.getId()] = character;
+    }
+
     BitReader bitsR;
-    uint8_t readingBuf;
-    while (c.read(reinterpret_cast<char*>(&readingBuf), 1)) {
-        bool state = bitsR.readBits(ot, readingBuf, table);
-        if (!state) break; // reached the EOF
+    uint8_t chunk;
+    while (fileSizeBeforeCompression > 0) {
+        c.read(reinterpret_cast<char*>(&chunk), 1);
+        bitsR.readBits(ot, chunk, table, fileSizeBeforeCompression);
     }
 }
 
-std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> getCount(std::ifstream &f) {
+std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> getCount(std::ifstream &f, int &fileSize) {
     std::unordered_map <int, int> counter = {};
     int buffer;
     // get the count (weight) of each letter
     while ((buffer = f.get()) != EOF) {
+        fileSize++;
         counter[buffer]++;
     }
 
@@ -86,14 +131,13 @@ std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <T
 }
 
 std::shared_ptr <TreeNode> makeHuffTree(std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> pq) {
-    pq.push(std::make_shared <TreeNode> (-1, 1)); // hard-codded EOF
     while (pq.size() > 1) {
 
         // make a node out of the least used leaves
         // (the lowest weight) and add that node to our pq
         std::shared_ptr <TreeNode> a = pq.top(); pq.pop();
         std::shared_ptr <TreeNode> b = pq.top(); pq.pop();
-        pq.push(std::make_shared <TreeNode> (-1, a->weightOfChar + b->weightOfChar, a, b));
+        pq.push(std::make_shared <TreeNode> (0, a->weightOfChar + b->weightOfChar, a, b));
     }
     return pq.top();
 }

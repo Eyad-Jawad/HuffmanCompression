@@ -13,8 +13,22 @@ To use it you just have to say:
 
 ## The Code
 
-### The File Structure
-The file structe is like this:
+### The Encoded File Structure
+FILE STRUCTURE:
+```
+The header (14 bytes)
+HUF (signature) (3 bytes)
+File size before compression (4 bytes)
+number of unique symbols (1 byte)
+encoding table:
+    character value in ascii (1 byte)
+    its encoded value or bits (4 bytes)
+    the length of bytes because its hard to use bits in c++ (1 byte)
+compressed file
+```
+
+### The Folder Structure
+The folder structe is like this:
 ```
 src/
     zipper.cpp
@@ -33,7 +47,11 @@ examples/
 
 ### What Does Each File Do? And How Does The Code Work?
 
-* `inc.h` - has all the declarations, headings, one inline fucntion, and one struct for the priority queue
+* `inc.h` - has all the declarations, headings, one inline fucntion
+
+* `pqcmop.h` - the priority queue comparsion method is in this file, as a struct
+
+* `encodedchars.h` - a struct to keep track of bits and their length
 
 * `tree.h` - has the object implemention of a normal tree using shared pointers instead of normal pointers, each node has a value (a character ascii value if it is a character, and -1 in case of EOF or any node)
   and a weight to make the Huffman tree
@@ -47,7 +65,7 @@ examples/
 
 ## Examples
 
-You can find the files in the folder examples/
+You can find the files in the folder examples/  
 These numbers are from my machine, and if you could notice the last file the compression wasn't too significant, that's because the file has ranodm characters, so the function couldn't work well.
 
 ---
@@ -90,7 +108,7 @@ This project also taught me more about memory traversal, smart pointers, priorit
 It took me more than **40 hours** to make, the idea itself took me about 13h to make, but optimizations and debugging took the rest.  
 
 
-While there's a room for improvement, like making it actually useful by writing the encoding table in the encoded file, optimizing file reading/writing, and perhaps making the buffers bigger than they are for scaling up (or not using ints but vectors of them, perhaps), you could also scale it up to include not only text files, but every kind of file as well, but for me, I'm quite content with this.
+While there's a room for improvement, like optimizing file reading/writing, and perhaps making the buffers bigger than they are for scaling up (or not using ints but vectors of them, perhaps), you could also scale it up to include not only text files, but every kind of file as well, but for me, I'm quite content with this.
 
 Thank you for reading
 -*Eyad*.

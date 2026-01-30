@@ -23,11 +23,20 @@ inline bool isItALeaf(std::shared_ptr <TreeNode> head) {
     return !head->left && !head->right;
 }
 
+template <typename T>
+inline void writeBytes(std::ofstream &f, T buffer) {
+    T n = static_cast<T>(buffer);
+    f.write(reinterpret_cast<const char*>(&n), sizeof(n));
+}
+
 std::priority_queue <
     std::shared_ptr <TreeNode>, 
     std::vector <std::shared_ptr <TreeNode>>, 
     PQComp
-> getCount(std::ifstream &f);
+> getCount (
+    std::ifstream &f,
+    int &fileSize
+);
 
 std::shared_ptr <TreeNode> makeHuffTree(
         std::priority_queue <
@@ -44,13 +53,12 @@ void makeTable (
     std::unordered_map <int, encodedChars> &table
 );
 
-std::unordered_map <uint64_t, int> compress (
+void compress (
     std::ifstream &f, 
     std::string fileName
 );
 
 void decompress (
-    std::unordered_map <uint64_t, int> table,
     std::string fileName
 );
 
