@@ -1,8 +1,8 @@
 #ifndef INC_H
 #define INC_H
 
-
 #include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <cstdint>
 #include <fstream>
@@ -12,6 +12,8 @@
 #include <queue>
 #include <string>
 #include <vector>
+
+constexpr size_t CHUNK_SIZE = 1024 * 256;
 
 #include "types/encodedchars.h"
 #include "objects/bitwriter.h"

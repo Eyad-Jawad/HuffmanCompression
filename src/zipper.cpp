@@ -76,9 +76,9 @@ void decompress (std::string fileName) {
     readHeader(c, table, fileSizeBeforeCompression);
 
     BitReader bitsR;
-    uint8_t chunk;
+    std::array <uint8_t, CHUNK_SIZE> chunk;
     while (fileSizeBeforeCompression > 0) {
-        c.read(reinterpret_cast<char*>(&chunk), 1);
+        c.read(reinterpret_cast<char*>(&chunk), CHUNK_SIZE);
         bitsR.readBits(ot, chunk, table, fileSizeBeforeCompression);
     }
     // each symbol decoded is a byte from the original size
