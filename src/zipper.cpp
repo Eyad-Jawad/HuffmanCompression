@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
 void compress (std::ifstream &f, std::string fileName) {
     int fileSize = 0;
     std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> vals = getCount(f, fileSize);
+    std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> valsCopy = vals;
 
     std::shared_ptr <TreeNode> head = makeHuffTree(vals);
 
@@ -36,7 +37,7 @@ void compress (std::ifstream &f, std::string fileName) {
         return;
     }
 
-    writeHeader(o, table, fileSize);
+    writeHeader(o, valsCopy, fileSize, head);
 
     f.clear();
     f.seekg(0, std::ios::beg); // reset the count reader
@@ -72,14 +73,13 @@ void decompress (std::string fileName) {
     }
 
     int fileSizeBeforeCompression;
-    std::unordered_map <uint64_t, int> table = {};
-    readHeader(c, table, fileSizeBeforeCompression);
+    std::shared_ptr <TreeNode> head = readHeader(c, fileSizeBeforeCompression);
 
-    BitReader bitsR;
+    BitReader bitsR(head);
     std::array <uint8_t, CHUNK_SIZE> chunk;
     while (fileSizeBeforeCompression > 0) {
         c.read(reinterpret_cast<char*>(&chunk), CHUNK_SIZE);
-        bitsR.readBits(ot, chunk, table, fileSizeBeforeCompression);
+        bitsR.readBits(ot, chunk, head, fileSizeBeforeCompression);
     }
     // each symbol decoded is a byte from the original size
     // and this method decrements it until it has decoded
@@ -116,7 +116,7 @@ std::shared_ptr <TreeNode> makeHuffTree(std::priority_queue <std::shared_ptr <Tr
 
 void makeTable (std::shared_ptr <TreeNode> head, int i, int depth, std::unordered_map <int, encodedChars> &table) {
     if (!head) return;
-    if (isItALeaf(head)) {
+    if (head->isItALeaf()) {
         table[head->charValueInInt].n = i;
         table[head->charValueInInt].len = depth;
 
@@ -129,7 +129,7 @@ void makeTable (std::shared_ptr <TreeNode> head, int i, int depth, std::unordere
     makeTable(head->right, (i << 1) + 1, depth + 1, table);
 }
 
-void writeHeader (std::ofstream &o, std::unordered_map <int, encodedChars> &table, int &fileSize) {
+void writeHeader (std::ofstream &o, std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> &vals, int &fileSize, std::shared_ptr <TreeNode> head) {
     /*
         ============================================
         FILE STRUCTURE: (14 bytes)
@@ -138,40 +138,37 @@ void writeHeader (std::ofstream &o, std::unordered_map <int, encodedChars> &tabl
         number of unique symbols (2 bytes)
         encoding table:
             character value in ascii (1 byte)
-            its encoded value or bits (4 bytes)
-            the length of bytes because its hard to use bits in c++ (1 byte)
+            its weight (4 bytes)
         compressed file
         ============================================
     */
 
     o.write("HUF", 3); // signature
     writeBytes<int>(o, fileSize); 
-    uint16_t uniqueSymbols = static_cast<uint16_t> (table.size());
+    uint16_t uniqueSymbols = static_cast<uint16_t> (vals.size());
     writeBytes<uint16_t>(o, uniqueSymbols);
-    for (auto &v : table) {
-        writeBytes<uint8_t> (o, v.first);       // ascii character's value
-        writeBytes<uint32_t>(o, v.second.n);    // the encoded bits
-        writeBytes<uint8_t> (o, v.second.len);  // the length of the actual bits
+
+    for (int i = 0; i < uniqueSymbols; i++) {
+        // writing the cahracters in an ascending order
+        writeBytes<uint8_t>(o, vals.top()->charValueInInt);
+        writeBytes<int>    (o, vals.top()->weightOfChar); vals.pop();
     }
 }
 
-void readHeader (std::ifstream &c, std::unordered_map <uint64_t, int> &table, int &fileSizeBeforeCompression) {
+std::shared_ptr <TreeNode> readHeader (std::ifstream &c, int &fileSizeBeforeCompression) {
     c.read(reinterpret_cast<char*>(&fileSizeBeforeCompression), 4);
 
     uint16_t uniqueSymbols;
     c.read(reinterpret_cast<char*>(&uniqueSymbols), 2);
-    
+
+    std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> pq;
     // reading the encoding table
-    for (int _ = 0; _ < uniqueSymbols; _++) {
+    for (int i = 1; i <= uniqueSymbols; i++) {
         uint8_t character;
-        uint32_t bits;
-        uint8_t bitLen;
+        int weight;
         c.read(reinterpret_cast<char*>(&character), 1);
-        c.read(reinterpret_cast<char*>(&bits), 4);
-        c.read(reinterpret_cast<char*>(&bitLen), 1);
-        encodedChars c;
-        c.n = bits;
-        c.len = bitLen;
-        table[c.getId()] = character;
+        c.read(reinterpret_cast<char*>(&weight), 4);
+        pq.push(std::make_shared <TreeNode> (character, weight));
     }
+    return makeHuffTree(pq);
 }

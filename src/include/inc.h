@@ -16,14 +16,10 @@
 constexpr size_t CHUNK_SIZE = 1024 * 256;
 
 #include "types/encodedchars.h"
+#include "objects/tree.h"
 #include "objects/bitwriter.h"
 #include "objects/bitreader.h"
-#include "objects/tree.h"
 #include "types/pqcomp.h"
-
-inline bool isItALeaf(std::shared_ptr <TreeNode> head) {
-    return !head->left && !head->right;
-}
 
 template <typename T>
 inline void writeBytes(std::ofstream &f, T buffer) {
@@ -33,13 +29,23 @@ inline void writeBytes(std::ofstream &f, T buffer) {
 
 void writeHeader (
     std::ofstream &o, 
-    std::unordered_map <int, encodedChars> &table, 
-    int &fileSize
+    std::priority_queue <
+        std::shared_ptr <
+            TreeNode>, 
+        std::vector <
+            std::shared_ptr <
+                TreeNode>
+            >, 
+        PQComp> 
+    &vals, 
+    int &fileSize,
+    std::shared_ptr <TreeNode> head
 );
 
-void readHeader (
+std::shared_ptr <
+    TreeNode
+> readHeader (
     std::ifstream &c, 
-    std::unordered_map <uint64_t, int> &table, 
     int &fileSizeBeforeCompression
 );
 

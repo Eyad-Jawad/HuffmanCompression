@@ -10,4 +10,10 @@ struct encodedChars {
         return (static_cast <uint64_t> (len) << 32 |
                 static_cast <uint64_t> (n));
     }
+    bool operator() (
+        const int &Len1,
+        const int &Len2
+    )   const {
+        return Len1 > Len2;
+    }
 };

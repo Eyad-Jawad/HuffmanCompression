@@ -22,8 +22,7 @@ File size before compression (4 bytes)
 number of unique symbols (2 bytes)
 encoding table:
     character value in ascii (1 byte)
-    its encoded value or bits (4 bytes)
-    the length of bytes because its hard to use bits in c++ (1 byte)
+    its weight (4 bytes)
 compressed file
 ```
 
@@ -74,7 +73,7 @@ These numbers are from my machine, and if you could notice the last file the com
 
 Size before comperssion: **608kb**  
 Size after comperssion: **358kb**  
-Time: **0.582s**
+Time: **0.562s**
 
 
 ---
@@ -83,7 +82,7 @@ Time: **0.582s**
 
 Size before comperssion: **171kb**  
 Size after comperssion: **103kb**  
-Time: **0.298s**
+Time: **0.247s**
 
 
 ---
@@ -92,7 +91,7 @@ Time: **0.298s**
 
 Size before comperssion: **9766kb**  
 Size after comperssion: **8121kb**  
-Time: **10.084s**
+Time: **7.764s**
 
 
 ---
@@ -105,7 +104,7 @@ Honestly I learned a lot about bits and how to work with them, this porject also
 This project also taught me more about memory traversal, smart pointers, priority queues, how to use object in a project, and perhaps most important of all, how does compression actually work.  
 
 
-It took me more than **40 hours** to make, the idea itself took me about 13h to make, but optimizations and debugging took the rest.  
+It took me more than **60 hours** to make, the idea itself took me about 13h to make, but optimizations and debugging took the rest.  
 
 
 While there's a room for improvement, like optimizing file reading/writing, and perhaps making the buffers bigger than they are for scaling up (or not using ints but vectors of them, perhaps), you could also scale it up to include not only text files, but every kind of file as well, but for me, I'm quite content with this.
