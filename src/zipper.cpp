@@ -23,7 +23,8 @@ int main(int argc, char *argv[]) {
     decompress(argv[2]);
 
     clock_t decompTime = clock() - runTime - compTime;
-    std::cout << "decompression time: " << decompTime/1000.0 << "s\n\n";
+    std::cout << "decompression time: " << decompTime/1000.0 << "s\n";
+    std::cout << "Total Time:         " << (decompTime + compTime)/1000.0 << "s\n\n";
 
     std::cout << "File size before compression: " << byteToKB(fileSizeBeforeComp) << "kb\n";
     std::cout << "File size after compression:  " << byteToKB(fileSizeAfterComp) << "kb\n";
