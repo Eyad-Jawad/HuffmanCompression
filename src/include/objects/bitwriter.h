@@ -8,6 +8,7 @@ class BitWriter {
         int lengthOfBits;
         int bufferSizeInBytes;
         int bufferSizeInBits;
+        int fileSizeAfterComp;
     public:
         BitWriter () {
             bits = 0;
@@ -15,6 +16,7 @@ class BitWriter {
             lengthOfBits = 0;
             bufferSizeInBytes = sizeof(buffer);
             bufferSizeInBits = bufferSizeInBytes * 8;
+            fileSizeAfterComp = 0;
         }
 
         // the input of this method is the file so we can write the bits
@@ -26,6 +28,7 @@ class BitWriter {
             bits = ((bits << charInput.len) | charInput.n);
 
             while (lengthOfBits >= bufferSizeInBits) {
+                fileSizeAfterComp++;
                 bitWriter(f);
             }
         }
@@ -44,11 +47,13 @@ class BitWriter {
 
         // this method is here in case the variable bits has some btis that it
         // are less than 8 in length, so we add a padding of 0s and write them
-        void flushBitWriter (std::ofstream &f) {
+        int flushBitWriter (std::ofstream &f) {
             if (lengthOfBits > 0) {
                 buffer = (bits << (bufferSizeInBits - lengthOfBits)); // the 0s padding
+                fileSizeAfterComp++;
                 f.write((reinterpret_cast<char*> (&buffer)), bufferSizeInBytes);
                 bits = lengthOfBits = buffer = 0;
             }
+            return fileSizeAfterComp;
         }
 };

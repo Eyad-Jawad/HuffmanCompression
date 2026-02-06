@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <ctime>
 #include <cstdlib>
 #include <cstdint>
 #include <fstream>
@@ -25,6 +26,9 @@ template <typename T>
 inline void writeBytes(std::ofstream &f, T buffer) {
     T n = static_cast<T>(buffer);
     f.write(reinterpret_cast<const char*>(&n), sizeof(n));
+}
+inline int byteToKB(int num) {
+    return num/1024;
 }
 
 void writeHeader (
@@ -75,7 +79,9 @@ void makeTable (
 
 void compress (
     std::ifstream &f, 
-    std::string fileName
+    std::string fileName,
+    int &fileSizeBeforeComp,
+    int &fileSizeAfterComp
 );
 
 void decompress (

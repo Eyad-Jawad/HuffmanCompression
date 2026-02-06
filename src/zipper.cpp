@@ -11,16 +11,31 @@ int main(int argc, char *argv[]) {
         std::cout << "Error: the file is empty!\n";
         return 1;
     }
+    clock_t runTime = clock();
+    int fileSizeBeforeComp = 0;
+    int fileSizeAfterComp  = 0;
 
-    compress(f, argv[2]);
+    compress(f, argv[2], fileSizeBeforeComp, fileSizeAfterComp);
 
+    clock_t compTime = clock() - runTime;
+    std::cout << "Compression time:   " << compTime/1000.0 << "s\n";
+    
     decompress(argv[2]);
+
+    clock_t decompTime = clock() - runTime - compTime;
+    std::cout << "decompression time: " << decompTime/1000.0 << "s\n\n";
+
+    std::cout << "File size before compression: " << byteToKB(fileSizeBeforeComp) << "kb\n";
+    std::cout << "File size after compression:  " << byteToKB(fileSizeAfterComp) << "kb\n";
+    float savedSpace = (fileSizeBeforeComp - fileSizeAfterComp) * 100 / fileSizeBeforeComp;
+    std::cout << "Saved: " << savedSpace << "% of space\n";
+
     return 0;
 }
 
 
 
-void compress (std::ifstream &f, std::string fileName) {
+void compress (std::ifstream &f, std::string fileName, int &fileSizeBeforeComp, int &fileSizeAfterComp) {
     int fileSize = 0;
     std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> vals = getCount(f, fileSize);
     std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> valsCopy = vals;
@@ -38,6 +53,7 @@ void compress (std::ifstream &f, std::string fileName) {
     }
 
     writeHeader(o, valsCopy, fileSize, head);
+    fileSizeBeforeComp = fileSize;
 
     f.clear();
     f.seekg(0, std::ios::beg); // reset the count reader
@@ -47,7 +63,7 @@ void compress (std::ifstream &f, std::string fileName) {
     while ((buf = f.get()) != EOF) {
         bits.bitStorer(o, table[buf]);
     }
-    bits.flushBitWriter(o);
+    fileSizeAfterComp = bits.flushBitWriter(o);
 
     o.close(); f.close();
     return;
