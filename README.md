@@ -65,7 +65,7 @@ examples/
 ## Examples
 
 You can find the files in the folder examples/  
-These numbers are from my machine, and if you could notice the last file the compression wasn't too significant, that's because the file has ranodm characters, so the function couldn't work well.
+These numbers are from my machine, and if you could notice the last file the compression wasn't too significant, that's because the file has ranodm characters, so the function couldn't work well, so did it happen with the pictures, one of them didn't compress well because it has many color values, but the other one (Sobel operator was run on it) did compress well, becuase there are a lot of black pixels and some white.
 
 ---
 
@@ -103,6 +103,30 @@ File size before compression: **9765kb**
 File size after compression:  **8119kb**  
 Saved: **16%** of space  
 
+
+---
+
+***[catPic](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/Images/no%20filter)***:
+
+Compression time:   **5.814s**
+decompression time: **14.602s**
+Total Time:         **20.416s**
+
+File size before compression: **22633kb**
+File size after compression:  **20883kb**
+Saved: **7%** of space
+
+---
+
+***[catPicWithSobel](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/Images/filtered)***:
+
+Compression time:   **5.601s**
+decompression time: **9.203s**
+Total Time:         **14.804s**
+
+File size before compression: **22633kb**
+File size after compression:  **13440kb**
+Saved: **40%** of space
 
 ---
 
