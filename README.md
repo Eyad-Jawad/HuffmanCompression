@@ -10,6 +10,11 @@ To use it you just have to say:
 ./zipper "InputFile" "outputFile"
 
 ````
+And I have made a bash script to automate compiling and running the tests if you want to:
+```
+./run-test.ps1
+
+```
 
 ## The Code
 
