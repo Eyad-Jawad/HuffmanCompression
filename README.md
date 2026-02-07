@@ -106,26 +106,26 @@ Saved: **16%** of space
 
 ---
 
-***[catPic](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/Images/no%20filter)***:
+***[catPic](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/Images/no%20filter)***:  
 
-Compression time:   **5.814s**
-decompression time: **14.602s**
-Total Time:         **20.416s**
+Compression time:   **5.814s**  
+decompression time: **14.602s**  
+Total Time:         **20.416s**  
 
-File size before compression: **22633kb**
-File size after compression:  **20883kb**
+File size before compression: **22633kb**  
+File size after compression:  **20883kb**  
 Saved: **7%** of space
 
 ---
 
-***[catPicWithSobel](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/Images/filtered)***:
+***[catPicWithSobel](https://github.com/Eyad-Jawad/HuffmanCompression/blob/Main/examples/Images/filtered)***:  
 
-Compression time:   **5.601s**
-decompression time: **9.203s**
-Total Time:         **14.804s**
+Compression time:   **5.601s**  
+decompression time: **9.203s**  
+Total Time:         **14.804s**  
 
-File size before compression: **22633kb**
-File size after compression:  **13440kb**
+File size before compression: **22633kb**  
+File size after compression:  **13440kb**  
 Saved: **40%** of space
 
 ---
