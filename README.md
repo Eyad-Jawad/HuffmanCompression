@@ -26,20 +26,20 @@ encoding table:
 compressed file
 ```
 
-### The Folder Structure
-The folder structe is like this:
+### The Project Structure
+The project structe is like this:
 ```
 src/
     zipper.cpp
-    include/
-        inc.h
-        objects/
-            tree.h
-            bitwriter.h
-            bitreader.h
-        types/
-            encodedchars.h
-            pqcomp.h
+include/
+    inc.h
+    objects/
+        tree.h
+        bitwriter.h
+        bitreader.h
+    types/
+        encodedchars.h
+        pqcomp.h
 examples/
     has some text files for testing
 ````
