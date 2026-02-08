@@ -18,18 +18,21 @@ int main(int argc, char *argv[]) {
     compress(f, argv[2], fileSizeBeforeComp, fileSizeAfterComp);
 
     clock_t compTime = clock() - runTime;
-    std::cout << "Compression time:   " << compTime/1000.0 << "s\n";
+    std::cout << "Compression time:   " << "          "; 
+    std::cout << compTime/1000.0 << "s\n";
     
     decompress(argv[2]);
 
     clock_t decompTime = clock() - runTime - compTime;
-    std::cout << "decompression time: " << decompTime/1000.0 << "s\n";
-    std::cout << "Total Time:         " << (decompTime + compTime)/1000.0 << "s\n\n";
+    std::cout << "decompression time: " << "          ";
+    std::cout << decompTime/1000.0 << "s\n";
+    std::cout << "Total Time:         " << "          ";
+    std::cout << (decompTime + compTime)/1000.0 << "s\n\n";
 
     std::cout << "File size before compression: " << byteToKB(fileSizeBeforeComp) << "kb\n";
     std::cout << "File size after compression:  " << byteToKB(fileSizeAfterComp) << "kb\n";
-    float savedSpace = (fileSizeBeforeComp - fileSizeAfterComp) * 100 / fileSizeBeforeComp;
-    std::cout << "Saved: " << savedSpace << "% of space\n";
+    float savedSpace = (fileSizeBeforeComp - fileSizeAfterComp) * 100.0 / fileSizeBeforeComp;
+    std::cout << "Saved space:                  " << savedSpace << "%\n";
 
     return 0;
 }
