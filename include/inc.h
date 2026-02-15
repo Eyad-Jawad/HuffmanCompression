@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-constexpr size_t CHUNK_SIZE = 1024 * 256;
+constexpr size_t CHUNK_SIZE = 1024 * 256; // Chunk size of 256kb
 
 #include "types/encodedchars.h"
 #include "objects/tree.h"
@@ -27,6 +27,7 @@ inline void writeBytes(std::ofstream &f, T buffer) {
     T n = static_cast<T>(buffer);
     f.write(reinterpret_cast<const char*>(&n), sizeof(n));
 }
+
 inline int byteToKB(int num) {
     return num/1024;
 }
@@ -86,6 +87,14 @@ void compress (
 
 void decompress (
     std::string fileName
+);
+
+void benchMarks (
+    const clock_t &compTime, 
+    const clock_t &decompTime, 
+    const int &fileSizeBeforeComp, 
+    const int &fileSizeAfterComp, 
+    const float &savedSpace
 );
 
 #endif

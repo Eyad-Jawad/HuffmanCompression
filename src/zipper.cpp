@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Error: the file is empty!\n";
         return 1;
     }
+
     clock_t runTime = clock();
     int fileSizeBeforeComp = 0;
     int fileSizeAfterComp  = 0;
@@ -18,25 +19,27 @@ int main(int argc, char *argv[]) {
     compress(f, argv[2], fileSizeBeforeComp, fileSizeAfterComp);
 
     clock_t compTime = clock() - runTime;
-    std::cout << "Compression time:   " << "          "; 
-    std::cout << compTime/1000.0 << "s\n";
+    float savedSpace = (fileSizeBeforeComp - fileSizeAfterComp) * 100.0 / fileSizeBeforeComp;
     
     decompress(argv[2]);
-
+    
     clock_t decompTime = clock() - runTime - compTime;
-    std::cout << "decompression time: " << "          ";
-    std::cout << decompTime/1000.0 << "s\n";
-    std::cout << "Total Time:         " << "          ";
-    std::cout << (decompTime + compTime)/1000.0 << "s\n\n";
-
-    std::cout << "File size before compression: " << byteToKB(fileSizeBeforeComp) << "kb\n";
-    std::cout << "File size after compression:  " << byteToKB(fileSizeAfterComp) << "kb\n";
-    float savedSpace = (fileSizeBeforeComp - fileSizeAfterComp) * 100.0 / fileSizeBeforeComp;
-    std::cout << "Saved space:                  " << savedSpace << "%\n";
+    benchMarks(compTime, decompTime, fileSizeBeforeComp, fileSizeAfterComp, savedSpace);
 
     return 0;
 }
 
+void benchMarks(const clock_t &compTime, const clock_t &decompTime, const int &fileSizeBeforeComp, const int &fileSizeAfterComp, const float &savedSpace) {
+    std::cout << "Compression time:   " << "          "; 
+    std::cout << compTime/1000.0 << "s\n";
+    std::cout << "decompression time: " << "          ";
+    std::cout << decompTime/1000.0 << "s\n";
+    std::cout << "Total Time:         " << "          ";
+    std::cout << (decompTime + compTime)/1000.0 << "s\n\n";
+    std::cout << "File size before compression: " << byteToKB(fileSizeBeforeComp) << "kb\n";
+    std::cout << "File size after compression:  " << byteToKB(fileSizeAfterComp) << "kb\n";
+    std::cout << "Saved space:                  " << savedSpace << "%\n";
+}
 
 
 void compress (std::ifstream &f, std::string fileName, int &fileSizeBeforeComp, int &fileSizeAfterComp) {
