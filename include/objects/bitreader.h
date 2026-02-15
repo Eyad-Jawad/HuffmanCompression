@@ -1,5 +1,7 @@
 #pragma once
-#include "inc.h"
+#include "tree.h"
+#include <cstdint>
+#include <vector>
 
 class BitReader {
     private: 

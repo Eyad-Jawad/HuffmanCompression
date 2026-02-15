@@ -1,5 +1,6 @@
 #pragma once
-#include "inc.h"
+#include <cstdint>
+#include <fstream>
 
 class BitWriter {
     private:

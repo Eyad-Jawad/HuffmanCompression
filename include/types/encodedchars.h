@@ -1,5 +1,5 @@
 #pragma once
-#include "inc.h"
+#include <cstdint>
 
 struct encodedChars {
     uint32_t n;

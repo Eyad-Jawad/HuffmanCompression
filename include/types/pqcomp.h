@@ -1,5 +1,5 @@
 #pragma once
-#include "inc.h"
+#include "objects/tree.h"
 
 struct PQComp {
     bool operator() (
