@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+
 void benchMarks(const clock_t &compTime, const clock_t &decompTime, const int &fileSizeBeforeComp, const int &fileSizeAfterComp, const float &savedSpace) {
     std::cout << "Compression time:   " << "          "; 
     std::cout << compTime/1000.0 << "s\n";
@@ -40,7 +41,6 @@ void benchMarks(const clock_t &compTime, const clock_t &decompTime, const int &f
     std::cout << "File size after compression:  " << byteToKB(fileSizeAfterComp) << "kb\n";
     std::cout << "Saved space:                  " << savedSpace << "%\n";
 }
-
 
 void compress (std::ifstream &f, std::string fileName, int &fileSizeBeforeComp, int &fileSizeAfterComp) {
     int fileSize = 0;
@@ -76,7 +76,7 @@ void compress (std::ifstream &f, std::string fileName, int &fileSizeBeforeComp, 
     return;
 }
 
-void decompress (std::string fileName) {
+void decompress (const std::string fileName) {
     std::ofstream ot ("decompressed " + fileName,        std::ios::binary);
     std::ifstream c  ("compressed " + fileName + ".bin", std::ios::binary);
     if (!c) {
@@ -125,7 +125,7 @@ std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <T
     return pq;
 }
 
-std::shared_ptr <TreeNode> makeHuffTree(std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> pq) {
+std::shared_ptr <TreeNode> makeHuffTree(std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> &pq) {
     while (pq.size() > 1) {
 
         // make a node out of the least used leaves
@@ -152,7 +152,7 @@ void makeTable (std::shared_ptr <TreeNode> head, int i, int depth, std::unordere
     makeTable(head->right, (i << 1) + 1, depth + 1, table);
 }
 
-void writeHeader (std::ofstream &o, std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> &vals, int &fileSize, std::shared_ptr <TreeNode> head) {
+void writeHeader (std::ofstream &o, std::priority_queue <std::shared_ptr <TreeNode>, std::vector <std::shared_ptr <TreeNode>>, PQComp> &vals, const int &fileSize, std::shared_ptr <TreeNode> head) {
     /*
         ============================================
         FILE STRUCTURE: (14 bytes)

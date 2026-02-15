@@ -24,7 +24,7 @@ class BitWriter {
         // when 8 bits (1 byte) of encodded characters is accumalated
         // and the charInput which is the encodded character
         // it is 16 btis because in huffman coding chars can get quite lengthy
-        void bitStorer (std::ofstream &f, encodedChars charInput) {
+        void bitStorer (std::ofstream &f, const encodedChars &charInput) {
             lengthOfBits += charInput.len;
             bits = ((bits << charInput.len) | charInput.n);
 

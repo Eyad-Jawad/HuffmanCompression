@@ -43,7 +43,7 @@ void writeHeader (
             >, 
         PQComp> 
     &vals, 
-    int &fileSize,
+    const int &fileSize,
     std::shared_ptr <TreeNode> head
 );
 
@@ -68,7 +68,7 @@ std::shared_ptr <TreeNode> makeHuffTree(
         std::shared_ptr <TreeNode>, 
         std::vector <std::shared_ptr <TreeNode>>, 
         PQComp
-    > pq
+    > &pq
 );
 
 void makeTable (
@@ -86,7 +86,7 @@ void compress (
 );
 
 void decompress (
-    std::string fileName
+    const std::string fileName
 );
 
 void benchMarks (

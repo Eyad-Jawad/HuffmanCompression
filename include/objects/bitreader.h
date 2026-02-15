@@ -11,7 +11,7 @@ class BitReader {
             dummy = head;
         }
 
-        void readBits(std::ofstream &f, std::array<uint8_t, CHUNK_SIZE> &chunks, std::shared_ptr <TreeNode> head, int &remainingBytes) {
+        void readBits(std::ofstream &f, const std::array<uint8_t, CHUNK_SIZE> &chunks, std::shared_ptr <TreeNode> head, int &remainingBytes) {
             std::vector <uint8_t> writingBuffer;
 
             // reading every chunk (byte) in our 256kb

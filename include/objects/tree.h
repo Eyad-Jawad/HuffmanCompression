@@ -19,7 +19,7 @@ class TreeNode {
         // for the Huffman tree
 
         // the constructer:
-        TreeNode (uint8_t v, int w, 
+        TreeNode (const uint8_t &v, const int &w, 
             std::shared_ptr <TreeNode> l = nullptr, 
             std::shared_ptr <TreeNode> r = nullptr) {
 
