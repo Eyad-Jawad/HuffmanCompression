@@ -86,7 +86,8 @@ void compress (
 );
 
 void decompress (
-    const std::string fileName
+    const std::string fileName,
+    const std::string outputFileName
 );
 
 void benchMarks (

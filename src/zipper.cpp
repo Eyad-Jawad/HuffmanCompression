@@ -1,12 +1,12 @@
 #include "../include/inc.h"
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        std::cout << "Proper use: ./zipper fileName outputFileName\nPlease try again\n";
+    if (argc != 4) {
+        std::cout << "Proper use: ./zipper comp/decomp fileName outputFileName\ncomp for compress and decomp for decompress\nPlease try again\n";
         return 1; 
     }
 
-    std::ifstream f (argv[1], std::ios::binary);
+    std::ifstream f (argv[2], std::ios::binary);
     if (!f) {
         std::cout << "Error: the file is empty!\n";
         return 1;
@@ -15,13 +15,18 @@ int main(int argc, char *argv[]) {
     auto runTime = std::chrono::steady_clock::now();
     int fileSizeBeforeComp = 0;
     int fileSizeAfterComp  = 0;
+    std::string mode = argv[1];
 
-    compress(f, argv[2], fileSizeBeforeComp, fileSizeAfterComp);
+    if (mode == "comp") {
+        compress(f, argv[3], fileSizeBeforeComp, fileSizeAfterComp);
+    }
 
     auto compTime = std::chrono::steady_clock::now() - runTime;
     float savedSpace = (fileSizeBeforeComp - fileSizeAfterComp) * 100.0 / fileSizeBeforeComp;
     
-    decompress(argv[2]);
+    if (mode ==  "decomp") {
+        decompress(argv[2], argv[3]);
+    }
     
     auto decompTime = std::chrono::steady_clock::now() - runTime - compTime;
     benchMarks(compTime, decompTime, fileSizeBeforeComp, fileSizeAfterComp, savedSpace);
@@ -57,7 +62,7 @@ void compress (std::ifstream &f, std::string fileName, int &fileSizeBeforeComp, 
     std::unordered_map <int, encodedChars> table = {};
     makeTable(head, 0, 0, table);
 
-    std::ofstream o ("compressed " + fileName + ".bin", std::ios::binary);
+    std::ofstream o (fileName, std::ios::binary);
 
     if (!o) {
         std::cout << "Error: Could not open a file for compression\n";
@@ -81,9 +86,9 @@ void compress (std::ifstream &f, std::string fileName, int &fileSizeBeforeComp, 
     return;
 }
 
-void decompress (const std::string fileName) {
-    std::ofstream ot ("decompressed " + fileName,        std::ios::binary);
-    std::ifstream c  ("compressed " + fileName + ".bin", std::ios::binary);
+void decompress (const std::string fileName, const std::string outputFileName) {
+    std::ifstream c  (fileName,       std::ios::binary);
+    std::ofstream ot (outputFileName, std::ios::binary);
     if (!c) {
         std::cout << "Error: Could not open the comperssed file\n";
         return;

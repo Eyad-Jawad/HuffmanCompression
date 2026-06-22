@@ -5,12 +5,24 @@ It can compress and decompress text files. It can decrease text files' size by a
 
 ## How to Use It?
 License: MIT  
-To use it you just have to say:  
+First you need to compile the code, for that you need to be outside src/ and run:  
+
 ```
 
-./zipper "InputFile" "outputFile"
+g++ src/zipper.cpp -Iinclude -O3 -march=native -o src/zipper
+
+```  
+
+To use it you just have to say:  
+
+```
+
+./zipper mode "InputFile" "outputFile"
 
 ````
+
+The modes are "comp" for compression, and "decomp" for decompression    
+
 And I have made a power-shell script to automate compiling and running the tests if you want to:
 ```
 
