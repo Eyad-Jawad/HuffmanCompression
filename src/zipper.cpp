@@ -1,4 +1,4 @@
-#include "inc.h"
+#include "../include/inc.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -12,31 +12,36 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    clock_t runTime = clock();
+    auto runTime = std::chrono::steady_clock::now();
     int fileSizeBeforeComp = 0;
     int fileSizeAfterComp  = 0;
 
     compress(f, argv[2], fileSizeBeforeComp, fileSizeAfterComp);
 
-    clock_t compTime = clock() - runTime;
+    auto compTime = std::chrono::steady_clock::now() - runTime;
     float savedSpace = (fileSizeBeforeComp - fileSizeAfterComp) * 100.0 / fileSizeBeforeComp;
     
     decompress(argv[2]);
     
-    clock_t decompTime = clock() - runTime - compTime;
+    auto decompTime = std::chrono::steady_clock::now() - runTime - compTime;
     benchMarks(compTime, decompTime, fileSizeBeforeComp, fileSizeAfterComp, savedSpace);
 
     return 0;
 }
 
 
-void benchMarks(const clock_t &compTime, const clock_t &decompTime, const int &fileSizeBeforeComp, const int &fileSizeAfterComp, const float &savedSpace) {
+void benchMarks(const std::chrono::steady_clock::duration &compTime, const std::chrono::steady_clock::duration &decompTime, const int &fileSizeBeforeComp, const int &fileSizeAfterComp, const float &savedSpace) {
+    using namespace std::chrono;
+    auto compTimeInMs   = duration_cast <milliseconds> (compTime);
+    auto decompTimeInMs = duration_cast <milliseconds> (decompTime);
+    auto totalTimeInMs = compTimeInMs + decompTimeInMs;
     std::cout << "Compression time:   " << "          "; 
-    std::cout << compTime/1000.0 << "s\n";
+    std::cout << compTimeInMs.count() << "ms\n";
     std::cout << "decompression time: " << "          ";
-    std::cout << decompTime/1000.0 << "s\n";
+    std::cout << decompTimeInMs.count() << "ms\n";
     std::cout << "Total Time:         " << "          ";
-    std::cout << (decompTime + compTime)/1000.0 << "s\n\n";
+    std::cout << totalTimeInMs.count() << "ms\n\n";
+
     std::cout << "File size before compression: " << byteToKB(fileSizeBeforeComp) << "kb\n";
     std::cout << "File size after compression:  " << byteToKB(fileSizeAfterComp) << "kb\n";
     std::cout << "Saved space:                  " << savedSpace << "%\n";

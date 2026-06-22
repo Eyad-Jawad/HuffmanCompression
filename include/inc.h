@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <array>
-#include <ctime>
+#include <chrono>
 #include <cstdlib>
 #include <cstdint>
 #include <fstream>
@@ -90,8 +90,8 @@ void decompress (
 );
 
 void benchMarks (
-    const clock_t &compTime, 
-    const clock_t &decompTime, 
+    const std::chrono::steady_clock::duration &compTime, 
+    const std::chrono::steady_clock::duration &decompTime, 
     const int &fileSizeBeforeComp, 
     const int &fileSizeAfterComp, 
     const float &savedSpace

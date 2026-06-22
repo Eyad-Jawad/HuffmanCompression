@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 Write-Host "================================================================================"
 
 Write-Host "Compiling..."
-g++ src/zipper.cpp -Iinclude -o src/zipper.exe
+g++ src/zipper.cpp -Iinclude -O2 -march=native -o src/zipper.exe
 Write-Host "Done Compiling!"
 
 Write-Host "Running tests..."
