@@ -4,7 +4,10 @@
 It can compress and decompress text files. It can decrease text files' size by a great margin (about 30% ~ 40% in my tests)
 
 ## How to Use It?
+
 License: MIT  
+Author: Eyad Jawad  
+
 First you need to compile the code, for that you need to be outside src/ and run:  
 
 ```
